@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>어근 : 클 대 (大) - 초등어휘 단어 게임</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #FFFAF0;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #FF69B4;
+        }
+        .hidden {
+            display: none;
+        }
+        .section {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #FFF0F5;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 15px 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #FF1493;
+        }
+        .quiz-option {
+            display: block;
+            text-align: left;
+            margin: 10px 0;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        #score {
+            font-size: 24px;
+            color: #32CD32;
+        }
+        #incorrectAnswers {
+            text-align: left;
+            margin-top: 20px;
+        }
+        #incorrectAnswers p {
+            color: #FF4500;
+        }
+    </style>
+</head>
+<body>
+
+<h1>✨ 어근 : 클 대 (大) - 초등어휘 단어 게임 ✨</h1>
+
+<div id="studySection" class="section">
+    <div id="studyContent">
+        <!-- Study content will be injected here -->
+    </div>
+    <button class="button" id="nextStudyBtn">다음</button>
+</div>
+
+<div id="quizSection" class="section hidden">
+    <h2>단어 퀴즈</h2>
+    <div id="quizContent">
+        <!-- Quiz content will be injected here -->
+    </div>
+    <button class="button" id="nextQuizBtn">다음</button>
+    <button class="button hidden" id="submitQuizBtn">제출</button>
+</div>
+
+<div id="scoreSection" class="section hidden">
+    <h2>🎉 점수 🎉</h2>
+    <p id="score">0 / 10</p>
+    <div id="incorrectAnswers">
+        <!-- Incorrect answers will be displayed here -->
+    </div>
+    <button class="button" onclick="location.reload()">다시 하기</button>
+</div>
+
+<script>
+// 데이터 정의
+const words = [
+    { word: "대형", definition: "크기가 큰 형식이나 형태." },
+    { word: "대규모", definition: "규모나 크기가 큰 것." },
+    { word: "대사", definition: "큰 일이나 중요한 사건." },
+    { word: "대인", definition: "어른이나 성인." },
+    { word: "대성", definition: "큰 성과나 성공." },
+    { word: "대의", definition: "큰 뜻이나 중요한 의리." },
+    { word: "대장", definition: "군대에서 높은 지위의 장군." },
+    { word: "대회", definition: "큰 규모로 열리는 모임이나 경기." },
+    { word: "대중", definition: "일반 사람들, 많은 사람들." },
+    { word: "대강", definition: "전체적인 큰 줄거리나 요점." }
+];
+
+const sentences = {
+    "대형": [
+        "공원에 대형 놀이 기구가 설치되었다.",
+        "대형 트럭이 도로를 지나간다.",
+        "대형 마트에서 장을 보았다."
+    ],
+    "대규모": [
+        "대규모 공사가 시작되었다.",
+        "대규모 행사에 참여했다.",
+        "대규모 인원이 모였다."
+    ],
+    "대사": [
+        "이번 행사는 우리 학교의 큰 대사이다.",
+        "국가의 대사를 처리하기 위해 회의가 열렸다.",
+        "그는 역사적인 대사에 참여했다."
+    ],
+    "대인": [
+        "대인으로서 책임감 있게 행동해야 한다.",
+        "이 책은 대인을 위한 내용이다.",
+        "그는 대인이 되었으니 스스로 결정해야 한다."
+    ],
+    "대성": [
+        "그는 사업에 대성했다.",
+        "노력 끝에 대성을 이루었다.",
+        "대성공을 거두었다."
+    ],
+    "대의": [
+        "대의를 위해 희생했다.",
+        "대의를 따르는 것이 옳다.",
+        "그는 대의를 품고 행동했다."
+    ],
+    "대장": [
+        "군대에서 대장은 높은 지위이다.",
+        "우리는 우리 반의 대장을 뽑았다.",
+        "그는 모험의 대장이 되었다."
+    ],
+    "대회": [
+        "운동회는 큰 대회이다.",
+        "수학 대회에서 상을 받았다.",
+        "노래 대회에 참가했다."
+    ],
+    "대중": [
+        "그 가수는 대중의 사랑을 받는다.",
+        "대중 교통을 이용하세요.",
+        "대중 문화에 관심이 많다."
+    ],
+    "대강": [
+        "책을 대강 읽었다.",
+        "회의의 대강을 설명했다.",
+        "일의 대강을 파악했다."
+    ]
+};
+
+// 퀴즈 질문 섞기 함수
+function shuffle(array) {
+    array.sort(() => Math.random() - 0.5);
+}
+
+const quizQuestions = [
+    {
+        question: "1. 노력 끝에 ____을 이루었다.",
+        options: ["대중", "대성"],
+        correctAnswer: "대성"
+    },
+    {
+        question: "2. 우리는 우리 반의 ____을 뽑았다.",
+        options: ["대사", "대장"],
+        correctAnswer: "대장"
+    },
+    {
+        question: "3. 공원에 ____ 놀이 기구가 설치되었다.",
+        options: ["대형", "대의"],
+        correctAnswer: "대형"
+    },
+    {
+        question: "4. 그 가수는 ____의 사랑을 받는다.",
+        options: ["대중", "대강"],
+        correctAnswer: "대중"
+    },
+    {
+        question: "5. 그는 ____으로서 책임감 있게 행동해야 한다.",
+        options: ["대인", "대회"],
+        correctAnswer: "대인"
+    },
+    {
+        question: "6. ____ 공사가 시작되었다.",
+        options: ["대규모", "대중"],
+        correctAnswer: "대규모"
+    },
+    {
+        question: "7. 책을 ____ 읽었다.",
+        options: ["대강", "대인"],
+        correctAnswer: "대강"
+    },
+    {
+        question: "8. 이번 행사는 우리 학교의 큰 ____이다.",
+        options: ["대사", "대성"],
+        correctAnswer: "대사"
+    },
+    {
+        question: "9. 운동회는 큰 ____이다.",
+        options: ["대장", "대회"],
+        correctAnswer: "대회"
+    },
+    {
+        question: "10. ____을 위해 희생했다.",
+        options: ["대의", "대형"],
+        correctAnswer: "대의"
+    }
+];
+
+// 퀴즈 옵션 섞기
+quizQuestions.forEach(q => {
+    shuffle(q.options);
+});
+
+// 상태 변수
+let currentWordIndex = 0;
+let currentQuizIndex = 0;
+let score = 0;
+let incorrectAnswers = [];
+
+// 초기화 함수
+function showDefinition() {
+    if (currentWordIndex < words.length) {
+        const word = words[currentWordIndex];
+        document.getElementById('studyContent').innerHTML = `
+            <h2>단어 뜻 배우기 (어근: 클 대)</h2>
+            <h3>${word.word}</h3>
+            <p>${word.definition}</p>
+        `;
+    } else {
+        // 모든 단어 학습이 끝나면 퀴즈 시작
+        document.getElementById('studySection').classList.add('hidden');
+        initQuiz();
+        document.getElementById('quizSection').classList.remove('hidden');
+    }
+}
+
+function showSentences() {
+    const word = words[currentWordIndex];
+    const sentenceList = sentences[word.word];
+    let sentencesHTML = `<h2>예문 배우기 (어근: 클 대)</h2><h3>${word.word}</h3>`;
+    sentenceList.forEach(sentence => {
+        sentencesHTML += `<p>• ${sentence}</p>`;
+    });
+    document.getElementById('studyContent').innerHTML = sentencesHTML;
+}
+
+// 버튼 이벤트 리스너
+document.getElementById('nextStudyBtn').addEventListener('click', () => {
+    if (document.getElementById('studyContent').innerHTML.includes('단어 뜻 배우기')) {
+        showSentences();
+    } else {
+        currentWordIndex++;
+        showDefinition();
+    }
+});
+
+// 퀴즈 함수
+function initQuiz() {
+    if (currentQuizIndex < quizQuestions.length) {
+        const q = quizQuestions[currentQuizIndex];
+        document.getElementById('quizContent').innerHTML = `
+            <p>${q.question}</p>
+            ${q.options.map((option, index) => `
+                <label class="quiz-option">
+                    <input type="radio" name="quiz${currentQuizIndex}" value="${option}">
+                    ${option}
+                </label>
+            `).join('')}
+        `;
+        // Toggle buttons
+        if (currentQuizIndex === quizQuestions.length - 1) {
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+            document.getElementById('submitQuizBtn').classList.remove('hidden');
+        } else {
+            document.getElementById('nextQuizBtn').classList.remove('hidden');
+        }
+    }
+}
+
+document.getElementById('nextQuizBtn').addEventListener('click', () => {
+    const q = quizQuestions[currentQuizIndex];
+    const selected = document.querySelector(`input[name="quiz${currentQuizIndex}"]:checked`);
+    if (selected) {
+        if (selected.value === q.correctAnswer) {
+            score++;
+        } else {
+            incorrectAnswers.push({
+                question: q.question,
+                yourAnswer: selected.value,
+                correctAnswer: q.correctAnswer
+            });
+        }
+        currentQuizIndex++;
+        initQuiz();
+    } else {
+        alert("답을 선택해주세요!");
+    }
+});
+
+document.getElementById('submitQuizBtn').addEventListener('click', () => {
+    const q = quizQuestions[currentQuizIndex];
+    const selected = document.querySelector(`input[name="quiz${currentQuizIndex}"]:checked`);
+    if (selected) {
+        if (selected.value === q.correctAnswer) {
+            score++;
+        } else {
+            incorrectAnswers.push({
+                question: q.question,
+                yourAnswer: selected.value,
+                correctAnswer: q.correctAnswer
+            });
+        }
+        currentQuizIndex++;
+        showScore();
+    } else {
+        alert("답을 선택해주세요!");
+    }
+});
+
+function showScore() {
+    document.getElementById('quizSection').classList.add('hidden');
+    document.getElementById('score').innerText = `${score} / ${quizQuestions.length}`;
+    if (incorrectAnswers.length > 0) {
+        let incorrectHTML = "<h3>틀린 문제</h3>";
+        incorrectAnswers.forEach(item => {
+            incorrectHTML += `
+                <p><strong>문제:</strong> ${item.question}</p>
+                <p><strong>당신의 답:</strong> ${item.yourAnswer}</p>
+                <p><strong>정답:</strong> ${item.correctAnswer}</p>
+                <hr>
+            `;
+        });
+        document.getElementById('incorrectAnswers').innerHTML = incorrectHTML;
+    } else {
+        document.getElementById('incorrectAnswers').innerHTML = "<p>모든 문제를 맞추셨습니다! 훌륭해요! 🎉</p>";
+    }
+    document.getElementById('scoreSection').classList.remove('hidden');
+}
+
+// 초기화 시작
+showDefinition();
+</script>
+
+</body>
+</html>
